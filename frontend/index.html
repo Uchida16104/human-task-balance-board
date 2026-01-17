@@ -1,88 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>HumanTask Balance Board</title>
+<meta charset="UTF-8" />
+<title>HumanTask Balance Board</title>
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Alpine -->
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<!-- Alpine -->
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-  <!-- HTMX -->
-  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+<!-- HTMX -->
+<script src="https://unpkg.com/htmx.org@2.0.4"></script>
 
-  <!-- hyperscript -->
-  <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+<!-- hyperscript -->
+<script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
 
-  <!-- Motion One -->
-  <script src="https://unpkg.com/@motionone/dom/dist/motion-one.min.js"></script>
+<!-- Motion One -->
+<script src="https://unpkg.com/@motionone/dom/dist/motion-one.min.js"></script>
 
-  <!-- AOS -->
-  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
-  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<!-- AOS -->
+<link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 
-  <!-- Swiper -->
-  <link rel="stylesheet" href="https://unpkg.com/swiper@11/swiper-bundle.min.css"/>
-  <script src="https://unpkg.com/swiper@11/swiper-bundle.min.js"></script>
+<!-- Swiper -->
+<link rel="stylesheet" href="https://unpkg.com/swiper@11/swiper-bundle.min.css">
+<script src="https://unpkg.com/swiper@11/swiper-bundle.min.js"></script>
 
-  <!-- Shoelace -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/dist/themes/light.css" />
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/dist/shoelace.js"></script>
+<!-- Shoelace -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/dist/themes/light.css">
+<script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/dist/shoelace.js"></script>
 
-  <!-- Iconify -->
-  <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+<!-- Iconify -->
+<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 
-  <!-- Mermaid -->
-  <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+<!-- Mermaid -->
+<script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
 
-  <!-- Lottie -->
-  <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+<!-- Lottie -->
+<script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
 
-  <link rel="stylesheet" href="./styles.css" />
+<!-- PouchDB -->
+<script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
+
 </head>
 
-<body class="bg-slate-50 text-slate-800" x-data="app()" x-init="init()">
+<body class="bg-slate-50 text-slate-800"
+      x-data="app()"
+      x-init="init()">
 
-  <header class="p-4 shadow bg-white">
-    <h1 class="text-xl font-bold">HumanTask Balance Board</h1>
-  </header>
+<header class="p-4 bg-white shadow">
+  <h1 class="text-xl font-bold flex items-center gap-2">
+    <span class="iconify" data-icon="mdi:heart-outline"></span>
+    HumanTask Balance Board
+  </h1>
+</header>
 
-  <main class="p-6 space-y-6">
+<main class="p-6 space-y-6">
 
-    <section data-aos="fade-up">
-      <h2 class="font-semibold mb-2">Mood Check-In</h2>
-      <select x-model="mood" class="border p-2 rounded">
-        <option>Low</option>
-        <option>Normal</option>
-        <option>High</option>
-      </select>
-    </section>
+<section data-aos="fade-up">
+  <label class="block mb-1 font-medium">Mood Check</label>
+  <select x-model="mood" class="border p-2 rounded">
+    <option>Low</option>
+    <option>Normal</option>
+    <option>High</option>
+  </select>
+</section>
 
-    <section data-aos="fade-up">
-      <h2 class="font-semibold mb-2">Tasks</h2>
-      <input x-model="newTask" class="border p-2 rounded w-full" placeholder="New task"/>
-      <button @click="addTask" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded">
-        Add
-      </button>
-      <ul class="mt-3">
-        <template x-for="task in tasks" :key="task.id">
-          <li class="py-1">• <span x-text="task.text"></span></li>
-        </template>
-      </ul>
-    </section>
+<section data-aos="fade-up">
+  <input x-model="taskInput" placeholder="New task"
+         class="border p-2 rounded w-full">
+  <button @click="addTask"
+          class="mt-2 px-4 py-2 bg-blue-600 text-white rounded">
+    Add Task
+  </button>
+</section>
 
-    <section>
-      <div class="mermaid">
-        graph TD
-          Mood --> Tasks
-          Tasks --> Balance
-      </div>
-    </section>
+<section>
+  <ul>
+    <template x-for="t in tasks" :key="t.id">
+      <li class="py-1">• <span x-text="t.text"></span></li>
+    </template>
+  </ul>
+</section>
 
-  </main>
+<section>
+<div class="mermaid">
+graph TD
+Mood --> Tasks
+Tasks --> Balance
+</div>
+</section>
 
-  <script src="./app.js"></script>
+<section>
+<div id="lottie" style="width:120px;height:120px"></div>
+</section>
+
+</main>
+
+<script>
+function app() {
+  return {
+    mood: "Normal",
+    taskInput: "",
+    tasks: [],
+    db: null,
+
+    init() {
+      AOS.init();
+      mermaid.initialize({ startOnLoad: true });
+
+      this.db = new PouchDB("humantask-local");
+
+      const saved = JSON.parse(localStorage.getItem("state") || "{}");
+      this.mood = saved.mood || this.mood;
+      this.tasks = saved.tasks || [];
+
+      lottie.loadAnimation({
+        container: document.getElementById("lottie"),
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        path: "https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json"
+      });
+    },
+
+    addTask() {
+      if (!this.taskInput) return;
+      this.tasks.push({ id: Date.now(), text: this.taskInput });
+      this.taskInput = "";
+      localStorage.setItem("state",
+        JSON.stringify({ mood: this.mood, tasks: this.tasks }));
+    }
+  };
+}
+</script>
+
 </body>
 </html>
