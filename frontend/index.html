@@ -42,7 +42,6 @@
 
 <!-- PouchDB -->
 <script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
-
 </head>
 
 <body class="bg-slate-50 text-slate-800"
@@ -56,34 +55,86 @@
   </h1>
 </header>
 
-<main class="p-6 space-y-6">
+<main class="p-6 space-y-6 max-w-2xl mx-auto">
 
+<!-- Mood -->
 <section data-aos="fade-up">
   <label class="block mb-1 font-medium">Mood Check</label>
-  <select x-model="mood" class="border p-2 rounded">
+  <select x-model="mood"
+          @change="persist()"
+          class="border p-2 rounded w-full">
     <option>Low</option>
     <option>Normal</option>
     <option>High</option>
   </select>
 </section>
 
+<!-- Add Task -->
 <section data-aos="fade-up">
-  <input x-model="taskInput" placeholder="New task"
+  <input x-model="taskInput"
+         placeholder="New task"
          class="border p-2 rounded w-full">
+
   <button @click="addTask"
           class="mt-2 px-4 py-2 bg-blue-600 text-white rounded">
     Add Task
   </button>
 </section>
 
+<!-- Task List -->
 <section>
-  <ul>
-    <template x-for="t in tasks" :key="t.id">
-      <li class="py-1">• <span x-text="t.text"></span></li>
+  <ul class="space-y-2">
+    <template x-for="task in tasks" :key="task.id">
+      <li class="p-3 bg-white rounded shadow flex items-center justify-between gap-2">
+
+        <!-- View Mode -->
+        <div x-show="!task.editing" class="flex-1">
+          <span x-text="task.text"></span>
+        </div>
+
+        <!-- Edit Mode -->
+        <div x-show="task.editing" class="flex-1">
+          <input x-model="task.text"
+                 class="border p-1 rounded w-full">
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-1 shrink-0">
+
+          <!-- Edit -->
+          <button x-show="!task.editing"
+                  @click="editTask(task)"
+                  class="px-2 py-1 text-sm bg-slate-200 rounded">
+            Edit
+          </button>
+
+          <!-- Save -->
+          <button x-show="task.editing"
+                  @click="saveTask(task)"
+                  class="px-2 py-1 text-sm bg-green-600 text-white rounded">
+            Save
+          </button>
+
+          <!-- Cancel -->
+          <button x-show="task.editing"
+                  @click="cancelEdit(task)"
+                  class="px-2 py-1 text-sm bg-gray-400 text-white rounded">
+            Cancel
+          </button>
+
+          <!-- Delete -->
+          <button @click="deleteTask(task.id)"
+                  class="px-2 py-1 text-sm bg-red-600 text-white rounded">
+            Delete
+          </button>
+
+        </div>
+      </li>
     </template>
   </ul>
 </section>
 
+<!-- Diagram -->
 <section>
 <div class="mermaid">
 graph TD
@@ -92,6 +143,7 @@ Tasks --> Balance
 </div>
 </section>
 
+<!-- Lottie -->
 <section>
 <div id="lottie" style="width:120px;height:120px"></div>
 </section>
@@ -105,16 +157,19 @@ function app() {
     taskInput: "",
     tasks: [],
     db: null,
+    snapshot: {},
 
     init() {
       AOS.init();
       mermaid.initialize({ startOnLoad: true });
-
       this.db = new PouchDB("humantask-local");
 
       const saved = JSON.parse(localStorage.getItem("state") || "{}");
       this.mood = saved.mood || this.mood;
-      this.tasks = saved.tasks || [];
+      this.tasks = (saved.tasks || []).map(t => ({
+        ...t,
+        editing: false
+      }));
 
       lottie.loadAnimation({
         container: document.getElementById("lottie"),
@@ -125,12 +180,42 @@ function app() {
       });
     },
 
+    persist() {
+      localStorage.setItem("state", JSON.stringify({
+        mood: this.mood,
+        tasks: this.tasks.map(({ editing, ...t }) => t)
+      }));
+    },
+
     addTask() {
       if (!this.taskInput) return;
-      this.tasks.push({ id: Date.now(), text: this.taskInput });
+      this.tasks.push({
+        id: Date.now(),
+        text: this.taskInput,
+        editing: false
+      });
       this.taskInput = "";
-      localStorage.setItem("state",
-        JSON.stringify({ mood: this.mood, tasks: this.tasks }));
+      this.persist();
+    },
+
+    deleteTask(id) {
+      this.tasks = this.tasks.filter(t => t.id !== id);
+      this.persist();
+    },
+
+    editTask(task) {
+      this.snapshot[task.id] = task.text;
+      task.editing = true;
+    },
+
+    saveTask(task) {
+      task.editing = false;
+      this.persist();
+    },
+
+    cancelEdit(task) {
+      task.text = this.snapshot[task.id];
+      task.editing = false;
     }
   };
 }
